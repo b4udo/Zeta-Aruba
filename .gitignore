@@ -1,0 +1,126 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.classpath
+.project
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Gradle
+.gradle
+build/
+gradle-wrapper.jar
+gradle-wrapper.properties
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database backups
+*.sql
+*.db
+*.sqlite
+
+# Node (if any frontend)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+out/
+dist/
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE specific
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Local development
+.localrc
+local.properties
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# AI Engine specific
+ai-engine/chromadb/
+ai-engine/.chroma/
+ai-engine/models/
+
+# MinIO buckets (local)
+minio-data/
+
+# Postgres data (local)
+postgres-data/

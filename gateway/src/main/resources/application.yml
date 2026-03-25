@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: ${USER_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/users/**
+        - id: pec-service
+          uri: ${PEC_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/mailboxes/**
+        - id: ai-engine
+          uri: ${AI_ENGINE_URL:http://localhost:8000}
+          predicates:
+            - Path=/api/v1/ai/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

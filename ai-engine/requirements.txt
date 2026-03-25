@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+chromadb
+langchain
+langchain-community
+sentence-transformers
+httpx
+pydantic-settings
+PyPDF2
+python-docx
+python-multipart
+pytest

@@ -1,0 +1,211 @@
+services:
+
+  # PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: zeta-postgres
+    environment:
+      POSTGRES_USER: zeta
+      POSTGRES_PASSWORD: zeta_secret
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./config/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh # Script init DB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zeta"] # Verifica che Postgres sia pronto
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeta-network
+
+  # keycloak identity provider, tipo IAM
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: zeta-keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8180
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./config/keycloak/zeta-realm.json:/opt/keycloak/data/import/zeta-realm.json # Config realm
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8180 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200\\|UP' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - zeta-network
+
+  # servizio di scodamento messaggi, tipo sqs
+  kafka:
+    image: bitnami/kafka:3.9
+    container_name: zeta-kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - zeta-network
+
+  # Storage tipo s3
+  minio:
+    image: minio/minio
+    container_name: zeta-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000" # API S3
+      - "9001:9001" # UI web
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeta-network
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: zeta-chromadb
+    ports:
+      - "8100:8000"
+    volumes:
+      - chromadb-data:/chroma/chroma
+    networks:
+      - zeta-network
+
+  ollama:
+    image: ollama/ollama
+    container_name: zeta-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - zeta-network
+
+  ai-engine:
+    build: ./ai-engine
+    container_name: zeta-ai-engine
+    environment:
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: mistral:7b
+      AI_TOP_K: 5
+      AI_REQUEST_TIMEOUT_SECONDS: 60
+    ports:
+      - "8000:8000"
+    depends_on:
+      - chromadb
+      - ollama
+    networks:
+      - zeta-network
+
+  # Microservizio utenti
+  user-service:
+    build: ./user-service
+    container_name: zeta-user-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeta_users
+      SPRING_DATASOURCE_USERNAME: zeta
+      SPRING_DATASOURCE_PASSWORD: zeta_secret
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/zeta # Validazione JWT
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092 # Eventi Kafka
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - zeta-network
+
+  # Microservizio PEC
+  pec-service:
+    build: ./pec-service
+    container_name: zeta-pec-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeta_pec
+      SPRING_DATASOURCE_USERNAME: zeta
+      SPRING_DATASOURCE_PASSWORD: zeta_secret
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/zeta
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MINIO_ENDPOINT: http://minio:9000 # Storage file tipo s3
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - zeta-network
+
+  # API Gateway
+  gateway:
+    build: ./gateway
+    container_name: zeta-gateway
+    environment:
+      USER_SERVICE_URL: http://user-service:8081
+      PEC_SERVICE_URL: http://pec-service:8082
+      AI_ENGINE_URL: http://ai-engine:8000
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080" # Entry point
+    depends_on:
+      - user-service
+      - pec-service
+      - ai-engine
+    networks:
+      - zeta-network
+
+# Persistent volumes
+volumes:
+  postgres-data:
+  kafka-data:
+  minio-data:
+  chromadb-data:
+  ollama-data:
+
+# Network interno tra i servizi
+networks:
+  zeta-network:
+    driver: bridge
