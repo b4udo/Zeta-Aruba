@@ -194,11 +194,3 @@ Dentro `ai-engine/`:
 pip install -r requirements.txt
 uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
-
-## Cosa mostra bene in colloquio
-
-- decomposizione per bounded context (`user`, `pec`, `ai`)
-- uso combinato di REST sincrono ed eventi Kafka
-- security centralizzata con Keycloak + JWT
-- separazione chiara tra demo locale e architettura target di produzione
-- estendibilità della pipeline AI verso deployment GPU / vector DB distribuiti
