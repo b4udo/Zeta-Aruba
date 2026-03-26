@@ -1,0 +1,228 @@
+{
+  "info": {
+    "name": "Zeta Platform Demo",
+    "description": "Collezione Postman per testare le API della Piattaforma Zeta (Demo).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Gestione Autenticazione (Keycloak)",
+      "item": [
+        {
+          "name": "Ottieni Token JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"access_token\", jsonData.access_token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "client_id", "value": "zeta-portal", "type": "text" },
+                { "key": "username", "value": "admin@zeta.local", "type": "text" },
+                { "key": "password", "value": "admin123", "type": "text" },
+                { "key": "grant_type", "value": "password", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8180/realms/zeta/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8180",
+              "path": ["realms", "zeta", "protocol", "openid-connect", "token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Microservizio Utenti",
+      "item": [
+        {
+          "name": "Crea Utente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.id) { pm.collectionVariables.set(\"user_id\", jsonData.id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"mario.rossi@zeta.local\",\r\n  \"firstName\": \"Mario\",\r\n  \"lastName\": \"Rossi\",\r\n  \"organization\": \"Zeta\",\r\n  \"role\": \"USER\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            }
+          }
+        },
+        {
+          "name": "Attiva Servizio PEC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/{{user_id}}/services/PEC",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "{{user_id}}", "services", "PEC"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Microservizio PEC",
+      "item": [
+        {
+          "name": "Recupera Mailbox Utente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData && jsonData.length > 0) { pm.collectionVariables.set(\"mailbox_id\", jsonData[0].id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/mailboxes/user/{{user_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "mailboxes", "user", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Invia Messaggio PEC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"recipientAddress\": \"destinatario@pec.local\",\r\n  \"subject\": \"Test PEC con Postman\",\r\n  \"body\": \"Questo è un test automizzato tramite Postman.\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/mailboxes/{{mailbox_id}}/messages",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "mailboxes", "{{mailbox_id}}", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Leggi Messaggi PEC",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/mailboxes/{{mailbox_id}}/messages",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "mailboxes", "{{mailbox_id}}", "messages"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. AI Engine",
+      "item": [
+        {
+          "name": "Indicizza Documento",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "document_id", "value": "doc-postman-01", "type": "text" },
+                { "key": "user_id", "value": "{{user_id}}", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/ai/index",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "ai", "index"]
+            }
+          }
+        },
+        {
+          "name": "Chat RAG",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"user_id\": \"{{user_id}}\",\r\n  \"query\": \"Di cosa parla il documento?\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/ai/chat",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "ai", "chat"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "access_token", "value": "" },
+    { "key": "user_id", "value": "" },
+    { "key": "mailbox_id", "value": "" }
+  ]
+}

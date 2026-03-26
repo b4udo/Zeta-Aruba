@@ -41,7 +41,7 @@ class DocumentProcessor:
         suffix = Path(filename).suffix.lower()
         if suffix == ".pdf":
             reader = PdfReader(BytesIO(content))
-            return "\n".join(page.extract_text() or "" for page in reader).strip()
+            return "\n".join(page.extract_text() or "" for page in reader.pages).strip()
         if suffix == ".docx":
             document = Document(BytesIO(content))
             return "\n".join(paragraph.text for paragraph in document.paragraphs).strip()

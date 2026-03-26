@@ -31,12 +31,14 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_PORT: 8180
       KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME: "http://localhost:8180"
+      KC_HOSTNAME_STRICT: "false"
     ports:
       - "8180:8180"
     volumes:
       - ./config/keycloak/zeta-realm.json:/opt/keycloak/data/import/zeta-realm.json
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8180/health/ready || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3 && timeout 3 cat <&3 | grep -q UP'"]
       interval: 15s
       timeout: 10s
       retries: 15
@@ -57,6 +59,9 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     ports:
       - "9092:9092"
     volumes:
@@ -88,6 +93,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - zeta-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: zeta-kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: zeta-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "9090:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks:
       - zeta-network
 
@@ -139,7 +158,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeta_users
       SPRING_DATASOURCE_USERNAME: zeta
       SPRING_DATASOURCE_PASSWORD: zeta_secret
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/zeta
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/zeta
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/zeta/protocol/openid-connect/certs
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
     ports:
@@ -164,7 +184,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeta_pec
       SPRING_DATASOURCE_USERNAME: zeta
       SPRING_DATASOURCE_PASSWORD: zeta_secret
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/zeta
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/zeta
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/zeta/protocol/openid-connect/certs
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
