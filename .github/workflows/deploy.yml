@@ -3,10 +3,10 @@ name: zeta-aruba-deploy
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -65,13 +65,17 @@ jobs:
       matrix:
         include:
           - image: zeta-aruba-gateway
-            context: ./gateway
+            context: .
+            dockerfile: gateway/Dockerfile
           - image: zeta-aruba-user-service
-            context: ./user-service
+            context: .
+            dockerfile: user-service/Dockerfile
           - image: zeta-aruba-pec-service
-            context: ./pec-service
+            context: .
+            dockerfile: pec-service/Dockerfile
           - image: zeta-aruba-ai-engine
             context: ./ai-engine
+            dockerfile: ai-engine/Dockerfile
 
     steps:
       - name: Checkout repository
@@ -101,6 +105,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

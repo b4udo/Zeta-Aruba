@@ -137,7 +137,7 @@ services:
       CHROMA_HOST: chromadb
       CHROMA_PORT: 8000
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: mistral:7b
+      OLLAMA_MODEL: phi3:mini
       AI_TOP_K: 5
       AI_REQUEST_TIMEOUT_SECONDS: 60
     ports:
