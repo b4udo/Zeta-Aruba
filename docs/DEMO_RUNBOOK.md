@@ -41,7 +41,7 @@ docker compose up --build -d
 ### Download del modello Ollama richiesto dalla demo
 
 ```powershell
-docker exec -it zeta-ollama ollama pull mistral:7b
+docker exec -it zeta-ollama ollama pull phi3:mini
 ```
 
 ### Verifica rapida dello stato

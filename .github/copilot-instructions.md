@@ -53,7 +53,7 @@ docker compose up --build -d
 docker compose up --build --no-cache -d
 
 # Pull Ollama LLM model (REQUIRED for ai-engine — 4 GB, one-time)
-docker exec -it zeta-ollama ollama pull mistral:7b
+docker exec -it zeta-ollama ollama pull phi3:mini
 ```
 
 > **Java version:** 21 | **Spring Boot:** 3.4.1 | **Spring Cloud:** 2024.0.0
@@ -107,7 +107,7 @@ ai-engine/src/
 ### Key Settings (configurable via env)
 | Variable | Default | Notes |
 |---|---|---|
-| `OLLAMA_MODEL` | `mistral:7b` | LLM model name |
+| `OLLAMA_MODEL` | `phi3:mini` | LLM model name |
 | `AI_TOP_K` | `5` | RAG retrieval results |
 | `AI_REQUEST_TIMEOUT_SECONDS` | `60` | Ollama call timeout |
 | `CHROMA_HOST` / `CHROMA_PORT` | `chromadb` / `8000` | ChromaDB connection |
@@ -133,7 +133,7 @@ ai-engine/src/
 - Spring Boot services use `SPRING_PROFILES_ACTIVE: docker` which activates the Docker datasource URL
 
 ### Ollama / AI Engine
-- The `mistral:7b` model (~4 GB) must be pulled manually after first start: `docker exec -it zeta-ollama ollama pull mistral:7b`
+- The `phi3:mini` model (~4 GB) must be pulled manually after first start: `docker exec -it zeta-ollama ollama pull phi3:mini`
 - ai-engine starts before Ollama is ready to serve the model — it uses retry/backoff, but first chat requests may time out
 
 ### Multi-stage Docker Builds

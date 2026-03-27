@@ -32,7 +32,7 @@ Il modulo usa questi componenti:
 - **sentence-transformers**: generazione embeddings
 - **ChromaDB**: vector store per salvare e cercare i chunk
 - **Ollama**: runtime locale del modello LLM
-- **Mistral 7B**: modello usato per la generazione della risposta
+- **phi3:mini**: modello usato per la generazione della risposta
 
 ## Come funziona, in pratica
 

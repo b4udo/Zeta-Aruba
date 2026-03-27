@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     chroma_host: str = Field(default="localhost", validation_alias="CHROMA_HOST")
     chroma_port: int = Field(default=8100, validation_alias="CHROMA_PORT")
     ollama_base_url: str = Field(default="http://localhost:11434", validation_alias="OLLAMA_BASE_URL")
-    ollama_model: str = Field(default="mistral:7b", validation_alias="OLLAMA_MODEL")
+    ollama_model: str = Field(default="phi3:mini", validation_alias="OLLAMA_MODEL")
     embedding_model: str = "all-MiniLM-L6-v2"
     request_timeout_seconds: float = Field(default=60.0, validation_alias="AI_REQUEST_TIMEOUT_SECONDS")
 

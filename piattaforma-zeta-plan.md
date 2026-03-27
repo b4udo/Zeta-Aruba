@@ -435,7 +435,7 @@ python-docx
   5. Invia ad **Ollama** via `llm_client`.
   6. Restituisce la risposta.
 - `llm_client.py`:
-  - Chiama `http://ollama:11434/api/chat` con modello `mistral:7b`.
+  - Chiama `http://ollama:11434/api/chat` con modello `phi3:mini`.
   - Gestisce timeout e errori base.
 
 ### Step 4.5 — API REST (FastAPI)
@@ -452,7 +452,7 @@ python-docx
 ### Step 4.7 — docker-compose additions
 Aggiungere al docker-compose:
 - **chromadb**: immagine `chromadb/chroma:latest`, porta 8100
-- **ollama**: immagine `ollama/ollama`, porta 11434. Nota: il modello va scaricato la prima volta con `ollama pull mistral:7b` (documentare nel README)
+- **ollama**: immagine `ollama/ollama`, porta 11434. Nota: il modello va scaricato la prima volta con `ollama pull phi3:mini` (documentare nel README)
 - **ai-engine**: build da `./ai-engine`, porta 8000, dipende da chromadb e ollama
 
 > **Nota**: Ollama su CPU è lento (~10-30 sec per risposta). È sufficiente per una demo. Nel README si documenta che in produzione si userebbe vLLM su GPU.

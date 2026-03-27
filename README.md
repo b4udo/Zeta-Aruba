@@ -51,7 +51,7 @@ docker-compose up --build
 2. In un secondo terminale, scarica il modello Ollama richiesto dalla demo:
 
 ```bash
-docker exec -it zeta-ollama ollama pull mistral:7b
+docker exec -it zeta-ollama ollama pull phi3:mini
 ```
 
 3. Verifica i servizi principali:
