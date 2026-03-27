@@ -31,8 +31,8 @@ class UserIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-        registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri",
-                () -> "http://localhost:18080/realms/zeta");
+        registry.add("spring.security.oauth2.resourceserver.jwt.jwk-set-uri",
+                () -> "http://localhost:18080/realms/zeta/protocol/openid-connect/certs");
         registry.add("spring.kafka.bootstrap-servers", () -> "localhost:19092");
         registry.add("spring.autoconfigure.exclude",
                 () -> "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration");
