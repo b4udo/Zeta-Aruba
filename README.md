@@ -16,7 +16,6 @@ Le scelte architetturali e i compromessi della demo sono spiegati in:
 
 - `../piattaforma-zeta-scelte-tecniche.md`
 - `docs/architecture.md`
-- `docs/DEMO_RUNBOOK_CLIENT.md` — Guida semplificata per demo cliente
 - `docs/DEMO_RUNBOOK.md` — Runbook tecnico completo con debug
 - `docs/AI_ENGINE_GUIDE.md`
 
