@@ -82,6 +82,27 @@
           }
         },
         {
+          "name": "Aggiorna Utente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Mario\",\r\n  \"lastName\": \"Bianchi\",\r\n  \"organization\": \"Zeta Aggiornata\",\r\n  \"role\": \"USER\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/{{user_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "{{user_id}}"]
+            }
+          }
+        },
+        {
           "name": "Attiva Servizio PEC",
           "request": {
             "method": "POST",

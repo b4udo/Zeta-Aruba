@@ -36,7 +36,7 @@ Architettura a microservizi con comunicazione REST sincrona + eventi asincroni, 
 ## 2. Spring Boot come Framework Applicativo
 
 ### Scelta
-Java 21 + Spring Boot 3.x per i microservizi backend.
+Java 21 + Spring Boot 3.4.1 per i ms BE
 
 ### Giustificazione
 - **Requisito esplicito** del documento di progetto.

@@ -38,6 +38,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isOwner(#id, authentication)")
     public UserResponse updateUser(@PathVariable UUID id,
                                    @Valid @RequestBody UpdateUserRequest request) {
         return userService.updateUser(id, request);

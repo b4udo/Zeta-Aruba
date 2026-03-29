@@ -21,7 +21,7 @@
 | `kafka` | 9092 | Apache Kafka 3.9 KRaft | Async events (`user.service.activated`) |
 | `minio` | 9000/9001 | MinIO | S3-compatible document storage |
 | `chromadb` | 8100 | ChromaDB | Vector DB for semantic search |
-| `ollama` | 11434 | Ollama | Local LLM host (Mistral 7B) |
+| `ollama` | 11434 | Ollama | Local LLM host (phi3:mini) |
 
 **Communication:**
 - **Sync (REST):** Client → Gateway → Services
